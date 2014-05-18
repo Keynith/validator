@@ -1,0 +1,67 @@
+table {
+  border: 1px solid black;
+}
+html, body {
+  background-color: #ffffff;
+}
+
+td {
+  vertical-align: top;
+}
+
+td pre, td p {
+  margin-top: 5px;
+}
+
+
+td.td_notes {
+  background-color: #eeeeee;
+  color: black;
+}
+
+tr.ok {
+  background-color: #eeffee;
+}
+tr.bad {
+  background-color: #ffeeee;
+}
+tr.dunno {
+  background-color: #ffffee;
+}
+
+#submitbutton {
+  background-color: blue;
+  color: white;
+  box-shadow: 5px 5px 5px #eee;
+  padding: 5px 10px 6px;
+  text-shadow: 0 -1px 1px rgba(0,0,0,0.25);
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+div.beforetable {
+  font-size: smaller;
+  width: 100%;
+}
+
+
+.progressbar {
+  background-color: black;
+  border-radius: 13px; /* (height of inner div) / 2 + padding */
+  padding: 3px;
+  margin: 2px;
+}
+
+.progressbar div {
+  background-color: blue;
+  width: 40%; /* Adjust with JavaScript */
+  height: 10px;
+  border-radius: 10px;
+}
+
+.progressbar_done div {
+  background-color: green;
+}
+.progressbar_bad div {
+  background-color: red;
+}

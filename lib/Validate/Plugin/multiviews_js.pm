@@ -1,0 +1,41 @@
+package Validate::Plugin::multiviews_js;
+
+use strict;
+use Validate::Plugin::MULTIVIEWS;
+
+
+sub new {
+    my $classname = shift;
+    my $self      = {};
+    bless( $self, $classname );
+    $self->{validate}=shift;
+    return $self;
+}
+
+sub run {
+   my $self = shift;
+   my $validate = $self->{validate};
+   my $config = $validate->{config};
+   
+   my %config = %{ $config};
+   my $site   = $config{"site"}{"name"};
+   my $domain = $config{"load"}{"domain"};
+   
+   my $modip =  Validate::Plugin::MULTIVIEWS->new($validate);
+   my %return = $modip->check("http://$site/index.js",<<"EOF");
+HTTP/1.1 200 OK
+Content-Location: index.js.gz.fr
+Vary: negotiate,accept-language,accept-encoding
+Content-Type: text/javascript; charset=utf-8
+Content-Encoding: gzip
+Content-Language: fr
+Exit-Code: 0
+EOF
+   
+   unless ($return{"status"} eq "ok") {
+   }
+   
+   return \%return;
+}
+
+1;
