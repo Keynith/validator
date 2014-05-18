@@ -1,21 +1,22 @@
-/*global GIGO, jQuery, escape, unescape*/
-/*jshint browser: true*/
-/*jshint devel: true*/
 
-GIGO.form_submit = function (e) {
-    var server, a = [];
-    server = jQuery("#server").val();
-    a.push(escape("server") + "=" + escape(server));
-    location.hash = a.join("&");
-    jQuery("#server").blur();
-    jQuery("#submitbutton").css("opacity", ".25").css("filter", "alpha(opacity=25)");
-    GIGO.start_audit_string(server);
-    return 0;
+GIGO.form_submit = function(e) {
+  server=    $('#server').val();
+  var a = [];
+  a.push(escape("server") + "=" + escape(server));
+  location.hash = a.join("&");
+  
+  $('#server').blur();
+              $('#submitbutton').css("opacity", ".25").css("filter", "alpha(opacity=25)");
+  GIGO.start_audit_string(server);
+  return 0;
 };
 
-GIGO.parseGetVars = function () {
-    var getVars, returnVars = [], i, newVar;
+
+GIGO.parseGetVars = function() {
+    var getVars, returnVars, i, newVar;
     getVars = location.search.substring(1).split("&");
+    returnVars = [];
+    i = 0;
     for (i = 0; i < getVars.length; i = i + 1) {
         newVar = getVars[i].split("=");
         returnVars[unescape(newVar[0])] = unescape(newVar[1]);
@@ -25,36 +26,42 @@ GIGO.parseGetVars = function () {
         newVar = getVars[i].split("=");
         returnVars[unescape(newVar[0])] = unescape(newVar[1]);
     }
+    
+    
     return returnVars;
 };
 
-GIGO.create_form = function (action) {
+GIGO.create_form = function(action) {
+
     var cgi, form, server;
+    
     cgi = GIGO.parseGetVars();
     server = cgi["server"];
-    form = jQuery("<form></form>", {
-        id: "serverform",
-        action: "javascript:GIGO.form_submit()"
-    });
-    form.append(jQuery("<input/>", {
+    form = $("<form></form>",
+     { id: "serverform",
+       action: "javascript:GIGO.form_submit()"
+       });
+    form.append($("<input/>", {
         name: "server",
         value: server,
         id: "server",
         type: "text",
-        maxLength: 80
+        maxLength: 80,
     }));
-    form.append(jQuery("<input/>", {
+    form.append($("<input/>", {
         type: "submit",
         value: "Audit",
         id: "submitbutton"
     }));
     form.focus();
-    return jQuery("<div id=form>").append(form);
+    return $("<div id=form>").append(form);
 };
 
-GIGO.add_form_to_page = function () {
+
+GIGO.add_form_to_page = function() {
     var form = GIGO.create_form(0);
-    jQuery("#form").replaceWith(jQuery("<div id=form>").append(form));
-    jQuery("#server").focus();
+    $("#form").replaceWith( $("<div id=form>").append(form) );
+    $("#server").focus();
+        
 };
 

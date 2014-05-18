@@ -1,44 +1,28 @@
-var GIGO;
-
 GIGO = {};
-GIGO.servers = {};
-GIGO.tasks = [];
-
-/*global GIGO, jQuery*/
-/*jshint browser: true*/
-/*jshint devel: true*/
-
+GIGO.servers = {};  // server name => random number
+GIGO.tasks = [];   // queue of things to work on
 GIGO.sites_image_size = 24;
 
-GIGO.max_threads = 8;
+GIGO.max_threads = 4;
 
 GIGO.running_threads = 0;
 
-GIGO.start_audit_string = function (server_string) {
+GIGO.start_audit_string = function(server_string) {
     var i, server_list;
     GIGO.servers = [];
-    jQuery("#results").empty();
-    jQuery("#pb").empty();
-    GIGO.stats_init();
+    $("#results").empty();
     server_list = server_string.split(" ");
-    jQuery("#pb").append(GIGO.progress_bar(0, 1, 0));
-    if (server_list.length > 1) {
-        jQuery("#multiple").show();
-    } else {
-        jQuery("#multiple").hide();
-    }
     for (i = 0; i < server_list.length; i = i + 1) {
         if (server_list[i] === "mirrors") {
             GIGO.start_audit_mirrors();
-            jQuery("#multiple").show();
         } else {
             GIGO.start_audit_host(server_list[i]);
         }
     }
 };
 
-GIGO.start_audit_mirrors = function () {
-    var data;
+GIGO.start_audit_mirrors = function() {
+    var entry, cgi, a, url, data;
     data = {};
     data.server = "test-ipv6.com";
     data.plugin = "_mirrors";
@@ -46,46 +30,49 @@ GIGO.start_audit_mirrors = function () {
         url: "/validate.cgi",
         data: data,
         dataType: "jsonp",
-        error: function (jqXHR, textStatus, errorThrown) {
+        error: function(jqXHR, textStatus, errorThrown) {
             alert("failed to get the mirrors list");
         },
-        success: function (data, textStatus, jqXHR) {
-            var x;
+        success: function(data, textStatus, jqXHR) {
+            var i;
             while (data.mirrors.length) {
-                x = data.mirrors.shift();
+                var x = data.mirrors.shift();
                 GIGO.start_audit_host(x);
             }
         }
     });
 };
 
-GIGO.start_audit_host = function (server) {
-    var div, task;
-    
+GIGO.start_audit_host = function(server) {
+    var task = {};
+    task.server = server;
     if (GIGO.servers[server]) {
         return;
     }
-    GIGO.servers[server] = 1;
-    div = jQuery("<div/>", {
+    task.id = Math.floor(Math.random() * 1e9);
+    GIGO.servers[server] = task.id;
+    task.pid = "#" + task.id;
+    task.cgi = "server=" + escape(server);
+    $("#results").append($("<div/>", {
+        id: task.id,
         "class": "ok"
-    }).append(jQuery("<h2>").html(server));
-    jQuery("#results").append(div);
-
-    task = {};
-    task.server = server;
-    task.context = div;
-    task.parent = task;
-    GIGO.stats_start_server(task);
-    GIGO.server_table_start(task);
-    GIGO.start_task_by_name(task, "_list");
+    }));
+    task.context = $(task.pid);
+    var h1 = $("<h1>");
+    h1.text(server);
+    task.context.append($("<div/>").append(h1));
+    task.plugin = "_list";
+    task.success = GIGO.success__list;
+    GIGO.add_task(task);
+    GIGO.next_task();
 };
 
-GIGO.next_task = function () {
-    var entry, data;
+GIGO.next_task = function() {
+    var entry, cgi, a, url, data;
     if (GIGO.running_threads < GIGO.max_threads && GIGO.tasks.length > 0) {
         entry = GIGO.tasks.shift();
         if (entry.td_image) {
-            jQuery("img", entry.td_image).css("opacity", "1.0").css("filter", "alpha(opacity=100)");
+            $("img", entry.td_image).css("opacity", "1.0").css("filter", "alpha(opacity=100)");
         }
         data = {};
         data.server = entry.server;
@@ -95,189 +82,126 @@ GIGO.next_task = function () {
             url: "/validate.cgi",
             data: data,
             dataType: "jsonp",
-            error: function (jqXHR, textStatus, errorThrown) {
-                jQuery("#submitbutton").css("opacity", "1.0").css("filter", "alpha(opacity=100)");
+            error: function(jqXHR, textStatus, errorThrown) {
+                $("#submitbutton").css("opacity", "1.0").css("filter", "alpha(opacity=100)");
                 if (entry.error) {
                     GIGO.running_threads = GIGO.running_threads - 1;
                     entry.error(entry, jqXHR, textStatus, errorThrown, this.url);
                 }
-                GIGO.stats_finish_task(entry, "bad");
             },
-            success: function (data, textStatus, jqXHR) {
-                jQuery("#submitbutton").css("opacity", "1.0").css("filter", "alpha(opacity=100)");
+            success: function(data, textStatus, jqXHR) {
+                $("#submitbutton").css("opacity", "1.0").css("filter", "alpha(opacity=100)");
                 if (entry.success) {
                     GIGO.running_threads = GIGO.running_threads - 1;
                     entry.success(entry, data, textStatus, jqXHR, this.url);
                 }
-                GIGO.stats_finish_task(entry, data.status);
             }
         });
     }
 };
 
-GIGO.add_task = function (task) {
-
+GIGO.add_task = function(task) {
+    var entry = {};
     GIGO.tasks.push(task);
-    GIGO.server_table_add_tr(task);
-    GIGO.stats_add_task(task);
-    GIGO.next_task();
 };
 
-GIGO.sort_tasks = function () {
-    GIGO.tasks.sort(function (a, b) {
-        if (a.plugin < b.plugin) return -1;
-        if (a.plugin > b.plugin) return 1;
-        return 0;
-    });
-};
-
-GIGO.next_task_scheduler = function () {
+GIGO.next_task_scheduler = function() {
     setInterval(GIGO.next_task, 1e3);
 };
 
-GIGO.progress_bar = function (a, b, e) {
-    var div, width, class2;
-    if (!b) {
-        a = b = 1;
+GIGO.success__list = function(entry, data, jqXHR, textStatus) {
+    div = $("<div/>").append(entry.plugin + " = data");
+    if (data.abort) {
+        div = $("<div/>").append("Aborting: " + data.error);
+        entry.context.append(div);
+        return;
     }
-    width = 100 * a / b;
-    width = width + "%";
-    
-    class2 = "";
-
-    if (a >= b) {
-        class2 = "progressbar_done";
-    }
-    if (e > 0) {
-        class2 = "progressbar_bad";
-    }
-    
-    div = jQuery("<div>", {
-        "class": "progressbar" + " "  + class2
-    });
-    div.append(jQuery("<div>", {
-        width: width
-    }));
-    return div;
-};
-
-GIGO.server_table_start = function (entry) {
-    var table, div, mdiv, a_show_all, a_show_bad, m_a_show_all, m_a_show_bad;
-    table = jQuery("<table></table>");
-    table.append("<tr><th>status</th><th>plugin</th><th>expected</th><th>found</th></tr>");
-    div = jQuery("<div></div>", {
-        "class": "beforetable"
-    });
-
-    a_show_all = jQuery("<a>show all</a>", {href: "#"});
-    a_show_bad = jQuery("<a>show bad</a>", {href: "#"});
-    a_show_all.click(function () {
-        jQuery("tr.tr1.ok:not(td)", entry.context).show();
-    });
-    a_show_bad.click(function () {
-        jQuery("tr.tr1.ok:not(td)", entry.context).show();
-        jQuery("tr.tr1.ok:not(td)", entry.context).hide();
-    });
-    div.append("[ ", a_show_all, " | ", a_show_bad, " ]");
-    entry.parent.pb = jQuery("<div></div>").append(GIGO.progress_bar(0, 1, 0));
-    entry.context.append(div, entry.pb, table);
-    
-    
-    // Also, we need the same buttons when looking at many servers
-    mdiv = jQuery("<div></div>", {
-        "class": "beforetable"
-    });
-    m_a_show_all = jQuery("<a>show all</a>", {href: "#"});
-    m_a_show_bad = jQuery("<a>show bad</a>", {href: "#"});
-    m_a_show_all.click(function () {
-        jQuery("tr.tr1.ok:not(td)").show();
-        jQuery("div.ok:not(td)").show();
-    });
-    m_a_show_bad.click(function () {
-        jQuery("tr.tr1.ok:not(td)").show();
-        jQuery("div.ok:not(td)").show();
-        jQuery("tr.tr1.ok:not(td)").hide();
-        jQuery("div.ok:not(td)").hide();
-    });
-    mdiv.append("[ ", m_a_show_all, " | ", m_a_show_bad, " ]");
-    jQuery("#actions").empty();
-    jQuery("#actions").append(mdiv);
-};
-
-GIGO.server_table_add_tr = function (entry) {
-    entry.tr = jQuery("<tr></tr>", {
-        "class": "tr1 pending"
-    });
-    entry.td_image = jQuery("<td></td>", {
-        "class": "td_image"
-    });
-    entry.td_name = jQuery("<td></td>", {
-        "class": "td_name"
-    });
-    entry.td_expect = jQuery("<td></td>", {
-        "class": "td_expect"
-    });
-    entry.td_found = jQuery("<td></td>", {
-        "class": "td_found"
-    });
-    entry.td_image.append(jQuery("<img>", {
-        src: "http://ds.test-ipv6.com/images/spinner.gif",
-        height: GIGO.sites_image_size,
-        width: GIGO.sites_image_size
-    }).css("opacity", "0.1").css("filter", "alpha(opacity=10)"));
-    entry.td_name.text(entry.plugin);
-    entry.tr.append(entry.td_image, entry.td_name, entry.td_expect, entry.td_found);
-    entry.tr2 = jQuery("<tr></tr>", {
-        "class": "tr2 pending"
-    });
-    entry.td2_image = jQuery("<td></td>", {
-        "class": "td2_image"
-    });
-    entry.td2_name = jQuery("<td></td>", {
-        "class": "td2_name"
-    });
-    entry.td_notes = jQuery("<td></td>", {
-        colSpan: 2,
-        "class": "td_notes"
-    });
-    entry.tr2.append(entry.td2_image, entry.td2_name, entry.td_notes);
-    entry.tr2.hide();
-    jQuery("tr:last", entry.context).after(entry.tr, entry.tr2);
-};
-
-GIGO.start_task_by_name = function (entry, plugin) {
-    var task = {};
-    task.server = entry.server;
-    task.plugin = plugin;
-    task.context = entry.context;
-    task.parent = entry.parent;
-    task.error = GIGO.error_generic;
-    task.success = GIGO.success_generic;
-    GIGO.add_task(task);
-};
-
-GIGO.start_plugins = function (entry, plugins) {
     var i;
-    if (plugins) {
-        for (i = 0; i < plugins.length; i = i + 1) {
-            GIGO.start_task_by_name(entry, plugins[i]);
-        }
+    var table = $("<table></table>");
+    table.append("<tr><th>?</th><th>plugin</th><th>expected</th><th>found</th></tr>");
+    for (i = 0; i < data.plugins.length; i++) {
+        var p = data.plugins[i];
+        var tid = "tr_" + entry.id + "_" + p;
+        var task = {};
+        task.server = entry.server;
+        task.id = entry.id;
+        task.pid = entry.pid;
+        task.tid = tid;
+        task.plugin = p;
+        task.context = entry.context;
+        task.error = GIGO.error_generic;
+        task.success = GIGO.success_generic;
+        var tr = $("<tr></tr>", {
+            id: task.tid,
+            "class": "tr1 pending"
+        });
+        var td_image = $("<td></td>", {
+            id: task.tid + "_td_image",
+            "class": "td_image"
+        });
+        var td_name = $("<td></td>", {
+            id: task.tid + "_td_name",
+            "class": "td_name"
+        });
+        var td_expect = $("<td></td>", {
+            id: task.tid + "_td_expect",
+            "class": "td_expect"
+        });
+        var td_found = $("<td></td>", {
+            id: task.tid + "_td_found",
+            "class": "td_found"
+        });
+        td_image.append($("<img>", {
+            src: "/images/spinner.gif",
+            height: GIGO.sites_image_size,
+            width: GIGO.sites_image_size
+        }).css("opacity", "0.1").css("filter", "alpha(opacity=10)"));
+        td_name.text(p);
+        tr.append(td_image, td_name, td_expect, td_found);
+        var tr2 = $("<tr></tr>", {
+            id: task.tid,
+            "class": "tr2 pending"
+        });
+        var td2_image = $("<td></td>", {
+            "class": "td2_image"
+        });
+        var td2_name = $("<td></td>", {
+            "class": "td2_name"
+        });
+        var td_notes = $("<td></td>", {
+            id: task.tid + "_td_notes",
+            colSpan: 2,
+            "class": "td_notes"
+        });
+        tr2.append(td2_image, td2_name, td_notes);
+        tr2.hide();
+        table.append(tr, tr2);
+        task.td_image = td_image;
+        task.td_name = td_name;
+        task.td_expect = td_expect;
+        task.td_found = td_found;
+        task.td_notes = td_notes;
+        task.tr = tr;
+        task.tr2 = tr2;
+        GIGO.add_task(task);
+        GIGO.next_task();
     }
+    entry.context.append(table);
 };
 
-GIGO.error_generic = function (entry, jqXHR, textStatus, errorThrown, url) {
-    jQuery("img", entry.td_image).replaceWith(jQuery("<img>", {
-        src: "http://ds.test-ipv6.com/images/knob_attention.png",
+GIGO.error_generic = function(entry, jqXHR, textStatus, errorThrown, url) {
+    $("img", entry.td_image).replaceWith($("<img>", {
+        src: "/images/knob_attention.png",
         height: GIGO.sites_image_size,
         width: GIGO.sites_image_size
     }));
     entry.td_notes.html("Error calling validate.cgi, errorThrown=" + errorThrown + " url=" + "<a href='" + url + "'>" + url + "</a>");
 };
 
-GIGO.success_generic = function (entry, data, jqXHR, textStatus) {
+GIGO.success_generic = function(entry, data, jqXHR, textStatus) {
     if (data.status === "ok") {
-        jQuery("img", entry.td_image).replaceWith(jQuery("<img>", {
-            src: "http://ds.test-ipv6.com/images/knob_valid_green.png",
+        $("img", entry.td_image).replaceWith($("<img>", {
+            src: "/images/knob_valid_green.png",
             height: GIGO.sites_image_size,
             width: GIGO.sites_image_size
         }));
@@ -289,10 +213,9 @@ GIGO.success_generic = function (entry, data, jqXHR, textStatus) {
             entry.tr2.addClass("ok");
             entry.tr2.removeClass("pending");
         }
-        GIGO.start_plugins(entry, data.plugins);
     } else if (data.status === "bad") {
-        jQuery("img", entry.td_image).replaceWith(jQuery("<img>", {
-            src: "http://ds.test-ipv6.com/images/knob_cancel.png",
+        $("img", entry.td_image).replaceWith($("<img>", {
+            src: "/images/knob_cancel.png",
             height: GIGO.sites_image_size,
             width: GIGO.sites_image_size
         }));
@@ -312,8 +235,8 @@ GIGO.success_generic = function (entry, data, jqXHR, textStatus) {
             entry.context.removeClass("ok");
         }
     } else {
-        jQuery("img", entry.td_image).replaceWith(jQuery("<img>", {
-            src: "http://ds.test-ipv6.com/images/knob_attention.png",
+        $("img", entry.td_image).replaceWith($("<img>", {
+            src: "/images/knob_attention.png",
             height: GIGO.sites_image_size,
             width: GIGO.sites_image_size
         }));
@@ -337,7 +260,7 @@ GIGO.success_generic = function (entry, data, jqXHR, textStatus) {
         } else if (data.error) {
             entry.td_notes.text(data.error);
         } else {
-            entry.td_notes.text("unknown error with plugin " + entry.plugin);
+            rentry.td_notes.text("unknown error with plugin " + entry.plugin);
         }
     }
     if (data.expect_html) {
@@ -358,47 +281,43 @@ GIGO.success_generic = function (entry, data, jqXHR, textStatus) {
     GIGO.next_task();
 };
 
-/*global GIGO, jQuery*/
-/*jshint browser: true*/
-/*jshint devel: true*/
 
 GIGO.autostart = function () {
-    var cgi, server_string, server_list, i, good;
-    cgi = GIGO.parseGetVars();
-    server_string = cgi["server"];
-    good = 0;
-    if (server_string) {
-        good = 1;
-        server_list = server_string.split(" ");
-        for (i = 0; i < server_list.length; i = i + 1) {
-            if (!server_list[i].match("ipv6")) {
-                good = 0;
-            }
-        }
+  var cgi, server_string, server_list,i,good;
+  cgi = GIGO.parseGetVars();
+  server_string = cgi["server"];
+  good=0;
+  if (server_string) {
+    good=1;
+    server_list = server_string.split(" ");
+    for (i=0; i < server_list.length; i=i+1) {
+      if (!server_list[i].match("ipv6")) {
+        good=0; // Don't allow autostart unless the server name says ipv6
+      }
     }
-    if (good) {
-        GIGO.start_audit_string(server_string);
-    }
+  }
+  if (good) {
+    GIGO.start_audit_string(server_string);
+  }
+};
+GIGO.form_submit = function(e) {
+  server=    $('#server').val();
+  var a = [];
+  a.push(escape("server") + "=" + escape(server));
+  location.hash = a.join("&");
+  
+  $('#server').blur();
+              $('#submitbutton').css("opacity", ".25").css("filter", "alpha(opacity=25)");
+  GIGO.start_audit_string(server);
+  return 0;
 };
 
-/*global GIGO, jQuery, escape, unescape*/
-/*jshint browser: true*/
-/*jshint devel: true*/
 
-GIGO.form_submit = function (e) {
-    var server, a = [];
-    server = jQuery("#server").val();
-    a.push(escape("server") + "=" + escape(server));
-    location.hash = a.join("&");
-    jQuery("#server").blur();
-    jQuery("#submitbutton").css("opacity", ".25").css("filter", "alpha(opacity=25)");
-    GIGO.start_audit_string(server);
-    return 0;
-};
-
-GIGO.parseGetVars = function () {
-    var getVars, returnVars = [], i, newVar;
+GIGO.parseGetVars = function() {
+    var getVars, returnVars, i, newVar;
     getVars = location.search.substring(1).split("&");
+    returnVars = [];
+    i = 0;
     for (i = 0; i < getVars.length; i = i + 1) {
         newVar = getVars[i].split("=");
         returnVars[unescape(newVar[0])] = unescape(newVar[1]);
@@ -408,38 +327,52 @@ GIGO.parseGetVars = function () {
         newVar = getVars[i].split("=");
         returnVars[unescape(newVar[0])] = unescape(newVar[1]);
     }
+    
+    
     return returnVars;
 };
 
-GIGO.create_form = function (action) {
+GIGO.create_form = function(action) {
+
     var cgi, form, server;
+    
     cgi = GIGO.parseGetVars();
     server = cgi["server"];
-    form = jQuery("<form></form>", {
-        id: "serverform",
-        action: "javascript:GIGO.form_submit()"
-    });
-    form.append(jQuery("<input/>", {
+    form = $("<form></form>",
+     { id: "serverform",
+       action: "javascript:GIGO.form_submit()"
+       });
+    form.append($("<input/>", {
         name: "server",
         value: server,
         id: "server",
         type: "text",
-        maxLength: 80
+        maxLength: 80,
     }));
-    form.append(jQuery("<input/>", {
+    form.append($("<input/>", {
         type: "submit",
         value: "Audit",
         id: "submitbutton"
     }));
     form.focus();
-    return jQuery("<div id=form>").append(form);
+    return $("<div id=form>").append(form);
 };
 
-GIGO.add_form_to_page = function () {
+
+GIGO.add_form_to_page = function() {
     var form = GIGO.create_form(0);
-    jQuery("#form").replaceWith(jQuery("<div id=form>").append(form));
-    jQuery("#server").focus();
+    $("#form").replaceWith( $("<div id=form>").append(form) );
+    $("#server").focus();
+        
 };
+
+
+jQuery(document).ready(function() {
+   jQuery("#noscript").hide(); /* Hide the ugly "JavaScript Required" message */
+   GIGO.add_form_to_page();
+   GIGO.next_task_scheduler();
+   GIGO.autostart();
+});
 
 /*global GIGO, jQuery*/
 /*jshint browser: true*/
@@ -448,7 +381,7 @@ GIGO.add_form_to_page = function () {
 GIGO.stats = {};
 
 GIGO.stats_init = function () {
-    jQuery("#status").html("Note, if you need to reproduce the DNS 'dig' test results, ask jfesler to open the DNS servers to your IP addresses.");
+    jQuery("#status").html("status goes here");
     GIGO.stats = {};
     GIGO.pending = 0;
     GIGO.bad = 0;

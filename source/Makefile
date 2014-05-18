@@ -1,8 +1,2 @@
-
-
-beta:
-	cd .. && make $@
-	
-prod:
-	cd .. && make $@
-	
+index.js::
+	cat _init.js audit.js form.js autostart.js index.js  > ../js/index.js
