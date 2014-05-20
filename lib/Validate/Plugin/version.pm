@@ -29,8 +29,7 @@ Could not identify the Revision number of your mirror.
 Please make sure that you're up to date (at least version $expect).
 
 * http://$site/version.html
-* http://code.google.com/p/falling-sky/wiki/InstallContent
-* http://code.google.com/p/falling-sky/wiki/UpgradeFromSvn
+* https://github.com/falling-sky/source/wiki/InstallContent
 EOF
         return { status => "bad", expect => $expect, found => $found, notes => $notes };
     }
@@ -47,7 +46,7 @@ for this are online; as well as instructions on how to automate
 this task with rsync and cron.
 
 * http://$site/version.html
-* http://code.google.com/p/falling-sky/wiki/InstallContent    
+* https://github.com/falling-sky/source/wiki/InstallContent    
 EOF
         return { status => "bad", expect => $expect, found => $found, notes => $notes, brief=>"upgrade $found to $expect" };
     }
@@ -59,7 +58,7 @@ sub get_version {
     my $url  = shift;
     $DB::single = 1;
     my ( $content, $headers ) = $self->{validate}->curl( $url, "--get" );
-      if ( $content =~ m#^Revision: (\d+)#ms ) {
+      if ( $content =~ m#^Revision: ([\d\.]+)#ms ) {
         return $1;
     } else {
         die $content;

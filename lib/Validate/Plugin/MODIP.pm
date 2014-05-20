@@ -95,8 +95,8 @@ Solutions:
 
 * Upgrade
 * Clean up your Apache configuration per May 2013 recommendations
-* http://code.google.com/p/falling-sky/wiki/InstallModIP
-* http://code.google.com/p/falling-sky/wiki/InstallApacheVirtualHost
+* https://github.com/falling-sky/source/wiki/InstallModIP
+* https://github.com/falling-sky/source/wiki/InstallApacheVirtualHost
 EOF
 
 my $content_notes = <<"EOF";
@@ -114,8 +114,8 @@ Solutions:
 
 * Upgrade
 * Clean up your Apache configuration per May 2013 recommendations
-* http://code.google.com/p/falling-sky/wiki/InstallModIP
-* http://code.google.com/p/falling-sky/wiki/InstallApacheVirtualHost
+* https://github.com/falling-sky/source/wiki/InstallModIP
+* https://github.com/falling-sky/source/wiki/InstallApacheVirtualHost
 EOF
 
            

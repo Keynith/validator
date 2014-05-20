@@ -71,8 +71,8 @@ plus the apache configuration that came with the falling-sky projoect.
 We recommend allowing this virtualhost to override options;
 doing so, will allow the bundled .htaccess files to take effect.
 
-http://code.google.com/p/falling-sky/wiki/InstallContent
-http://code.google.com/p/falling-sky/wiki/InstallApacheVirtualHost
+https://github.com/falling-sky/source/wiki/InstallContent
+https://github.com/falling-sky/source/wiki/InstallApacheVirtualHost
 EOF
 
            

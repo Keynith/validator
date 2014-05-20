@@ -74,7 +74,7 @@ Please make sure your Apache virtual host configuration matches the documentatio
 If it is, then double check your main httpd.conf, and add <code>multiviews</code>
 to your <code>Options</code> statement for the directory you host from.
 
-* http://code.google.com/p/falling-sky/wiki/InstallApacheVirtualHost
+* https://github.com/falling-sky/source/wiki/InstallApacheVirtualHost
 EOF
 
            

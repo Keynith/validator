@@ -65,7 +65,7 @@ by Google; and 4.2.2.1 for a single stack DNS server operated by Level 3.
  
 
 Please see
-http://code.google.com/p/falling-sky/wiki/InstallDNS for setup and
+https://github.com/falling-sky/source/wiki/InstallDNS for setup and
 validation.
 EOF
 

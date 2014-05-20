@@ -67,7 +67,7 @@ Unexpected results found when querying $resolver .
 
 * Make sure that DNS matches your <code>/site/config.js</code>
 * Make sure you have the right types of DNS for this name
-* http://code.google.com/p/falling-sky/wiki/InstallDNS
+* https://github.com/falling-sky/source/wiki/InstallDNS
 EOF
     return ( 
        status =>"bad",

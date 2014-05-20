@@ -24,11 +24,11 @@ sub run {
    my $modip =  Validate::Plugin::MULTIVIEWS->new($validate);
    my %return = $modip->check("http://$site/index.js",<<"EOF");
 HTTP/1.1 200 OK
-Content-Location: index.js.gz.fr
+Content-Location: index.js.gz.fr_FR
 Vary: negotiate,accept-language,accept-encoding
 Content-Type: text/javascript; charset=utf-8
 Content-Encoding: gzip
-Content-Language: fr
+Content-Language: fr-fr
 Exit-Code: 0
 EOF
    

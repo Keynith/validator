@@ -43,6 +43,10 @@ What we have found is that your configuration is either
 that you are out of sync with the example file, vhost-long.conf.example;
 or that your .htaccess files are out of date.
 
+By being out of date, language support and/or other features may be broken. 
+If this check fails, you might find other features breaking.  Fix your
+virtualhost config first; then re-audit to see if the other errors go away.
+
 The latest "stable" version of the content has the correct versions
 of the configuration that you need.  You can also see what is
 live and deployed on the master site, at
@@ -53,9 +57,8 @@ then the likely issue is merely that your content needs
 updating.  The content's distributed .htaccess files   
 will take care of your needs once you update.
 
-* http://code.google.com/p/falling-sky/wiki/InstallApacheVirtualHost
-* http://code.google.com/p/falling-sky/wiki/InstallContent
-* http://code.google.com/p/falling-sky/wiki/StayCurrent   
+* https://github.com/falling-sky/source/wiki/InstallApacheVirtualHost
+* https://github.com/falling-sky/source/wiki/InstallContent
 EOF
         return { status => "bad", expect => $expect, found => $found, notes => $notes };
     }
@@ -69,7 +72,7 @@ sub get_version {
     my ( $content, $headers ) = $self->{validate}->curl( $url, "--head");
     #Location: http://test-ipv6.com/?htrev=1306-566c7485c9f6198cedbae242049a8c78
     
-      if ( $headers =~ m#^Location: \S+htrev=(\d+-[0-9a-f]+)#ms) {
+      if ( $headers =~ m#^Location: \S+htrev=([\d.]+-[0-9a-f]+)#ms) {
         return $1;
     } else { 
        my($status) = split(/[\r\n]/,$headers);
