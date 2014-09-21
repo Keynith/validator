@@ -7,6 +7,9 @@ PROD=/var/www/validator.test-ipv6.com/
 
 default:: beta
 
+test:
+	perl  ./validate.cgi "server=test-ipv6.com&plugin=dns_ds_v4ns"
+
 beta:
 	make DESTDIR=$(BETA) install
 	
