@@ -62,7 +62,7 @@ EOF
    if ($output =~ /mtu=1280/) {
      $return{"status"}="ok";
    } else {
-     $return{"status"}="ok";
+     $return{"status"}="bad";
    }
    
    return \%return;
