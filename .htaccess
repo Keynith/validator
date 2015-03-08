@@ -1,0 +1,18 @@
+
+AddType "text/html;charset=UTF-8" .html
+AddType "text/javascript;charset=UTF-8" .js
+AddType "text/css;charset=UTF-8" .css
+RemoveType .gz
+AddEncoding x-gzip .gz
+
+
+<Files index.js>
+ FileETag none   
+ ExpiresActive off
+ Header append Expires "Thu, 01 Jan 1971 00:00:00 GMT"
+ RequestHeader unset If-Modified-Since
+</Files>
+
+<FilesMatch (\.pl|\.pm|~)$>
+ Deny from all
+</FilesMatch>

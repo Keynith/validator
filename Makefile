@@ -1,4 +1,4 @@
-FILES=*.js *.css *.html *.cgi lib  .htaccess
+FILES=*.js *.css *.html *.cgi lib  .htaccess ../source/images
 JSFILES=source/*.js
 CSSFILES=source/*.css
 
@@ -21,8 +21,7 @@ prod:
 install: index.js index.css
 	mkdir -p $(DESTDIR)/cache
 	ls -ld $(DESTDIR)/cache | cut -f1 | grep drwsrwxrwx || sudo chmod 4777 $(DESTDIR)/cache
-	rsync -av $(FILES) $(DESTDIR)/
-
+	rsync -av $(FILES) $(DESTDIR)/  --delete
 
 
 index.js: $(JSFILES)
