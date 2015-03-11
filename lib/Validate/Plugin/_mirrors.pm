@@ -1,6 +1,7 @@
 package Validate::Plugin::_mirrors;
 use strict;
 use FindBin qw($Bin);
+use YAML::Syck;
 
 sub new {
     my $classname = shift;
@@ -15,20 +16,20 @@ sub run {
     my $validate = $self->{validate};
     my $config   = $validate->{config};
     $DB::single = 1;
-
-    my $buffer = $validate->load_file("/home/jfesler/falling-sky/source/js/mirrors.js");
-    $buffer =~ s#/[*].*?[*]/##sg;
-    my $ref = $validate->parse_config( $buffer, "GIGO.mirrors" );
+    my $yref = LoadFile("/home/jfesler/falling-sky/source/sites/sites.yaml");
 
     my %return;
     $return{"mirrors"} = [];
     $return{"status"}  = "ok";
-
-    foreach my $href (@$ref) {
-        if ( !$href->{hide} ) {
-            push( @{ $return{"mirrors"} }, $href->{site} );
+    
+    foreach my $key ( keys %$yref ) {
+        if ( $yref->{$key}->{mirror} ) {
+            if ( !$yref->{$key}->{hide} ) {
+                push( @{ $return{"mirrors"} }, $key );
+            }
         }
     }
+
 
   @{ $return{"mirrors"} } = sort bydomain @{ $return{"mirrors"} } ;
   
