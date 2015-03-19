@@ -31,6 +31,15 @@ sub run {
      };
    }
    
+   if ($mtu1280 =~ m/mtu1280.test-ipv6.com$/) {
+    return {
+      status => "bad",
+      found =>"config.js options v6mtu => $mtu1280",
+      expect => "config.js options v6mtu=> mtu1280.$domain",
+       notes=>"Please see https://github.com/falling-sky/source/wiki/InstallPMTUD . Note that the v6mtu site address should point a hostname in your domain, not mine :-)"
+    }
+   }
+   
    my $pinghost = $mtu1280;
    my $cmd = "ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
    my $output = `$cmd 2>&1`;
