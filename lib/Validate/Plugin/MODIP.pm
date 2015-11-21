@@ -74,7 +74,7 @@ EOF
   my $found_i = $validate->indent($found);
   
    my $wanted = $content;
-   $wanted =~ s/"via":""/"via":"","asn":"6939","asn_name":"HURRICANE - Hurricane Electric, Inc.","asnlist":"6939"/;
+   $wanted =~ s/"via":""/"via":"","asn":"202109","asn_name":"DIGITALOCEAN-ASN-2 Digital Ocean, Inc.,GB","asnlist":"202109"/;
    my $wanted_i = $validate->indent($wanted);
    my $content_i = $validate->indent($content);
 

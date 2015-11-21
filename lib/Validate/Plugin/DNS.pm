@@ -21,9 +21,9 @@ sub check {
   my %expect = map  { $_ => 1 } @expect;
   my @expect;
   $DB::single=1;
-  push(@expect,sprintf("%s %s %s",$name,"A",$self->{validate}->{config}->{load}->{ipv4})) if ($expect{"A"});
-  push(@expect,sprintf("%s %s %s",$name,"AAAA",$self->{validate}->{config}->{load}->{ipv6})) if ($expect{"AAAA"});
-  my $expect = join("\n",@expect);
+  push(@expect,sprintf("%s %s %s",$name,"A",lc $self->{validate}->{config}->{load}->{ipv4})) if ($expect{"A"});
+  push(@expect,sprintf("%s %s %s",$name,"AAAA",lc $self->{validate}->{config}->{load}->{ipv6})) if ($expect{"AAAA"});
+  my $expect =  join("\n",@expect);
   my $res = new Net::DNS::Resolver( nameservers => [$resolver], recurse => 1 );
   my $validate = $self->{validate};
        
@@ -37,7 +37,7 @@ sub check {
          @answer = grep ( $_->type eq $type, @answer );
          if (@answer) {
            foreach my $answer (@answer) {
-             my $address = $answer->address;
+             my $address = lc $answer->address;
              my $p = ($address =~ /:/) ? AF_INET6 : AF_INET;
              my $i = inet_pton($p,$address);
              $address = inet_ntop($p,$i);
@@ -49,7 +49,7 @@ sub check {
       push(@found,sprintf("%s %s %s",$name,$type,$res->errorstring));
     }
   }  
-  my $found = join("\n", @found);
+  my $found =  join("\n", @found);
   $found = "<no A or AAAA>" unless ($found);
   
   my $found_i = $validate->indent($found);
