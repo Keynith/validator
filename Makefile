@@ -5,13 +5,14 @@ CSSFILES=source/*.css
 BETA_HOST=gigo.com
 BETA_DIR=/var/www/beta.validator.test-ipv6.com
 
-PROD_HOST=london.gigo.com
+PROD_HOST=bender.gigo.com
 PROD_DIR=/var/www/validator.test-ipv6.com/
 
 default:: beta
 
 test:
-	perl  ./validate.cgi "server=test-ipv6.com&plugin=dns_ds_v4ns"
+	perl  ./validate.cgi "server=vm1.test-ipv6.com&plugin=dns_ds_v4ns"
+	echo 'url=http%3A%2F%2Fipv6.test-ipv6.com%2Fimages-nc%2Fknob_green.png' | perl  ./urlvalidate.cgi
 
 beta:
 	make DESTHOST=$(BETA_HOST) DESTDIR=$(BETA_DIR) install
@@ -32,4 +33,8 @@ index.js: $(JSFILES)
 	 
 index.css: $(CSSFILES)
 	cat $(CSSFILES) > index.css
+
+debug:
+	echo 'url=http%3A%2F%2Fipv6.test-ipv6.com%2Fimages-nc%2Fknob_green.png' | ./urlvalidate.cgi
+	
 	
