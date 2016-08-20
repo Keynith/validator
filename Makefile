@@ -20,6 +20,9 @@ beta:
 prod:
 	make DESTHOST=$(PROD_HOST) DESTDIR=$(PROD_DIR) install
 
+sudoers:
+	sudo cp fsky-validator.sudoers /etc/sudoers.d/fsky-validator
+	sudo chmod 0440 /etc/sudoers.d/fsky-validator
 
 
 install: index.js index.css

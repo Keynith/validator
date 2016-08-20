@@ -23,7 +23,7 @@ sub run {
    my $mtu1280 = $config{"options"}{"v6mtu"};
    
    my $pinghost = "ipv6.$domain";
-   my $cmd = "ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
+   my $cmd = "sudo ip -6 route flush cache 2>&1 ; ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
    my $output = `$cmd 2>&1`;
    
    my $output_html = escapeHTML($output);
@@ -49,7 +49,7 @@ $output_html
 
 EOF
    
-   $return{"expect"} = "ping -M dont -c 3 -s 1452 $pinghost works<br>(testing for MTU of 1500)";
+   $return{"expect"} = "ping6 -M dont -c 3 -s 1452 $pinghost works<br>(testing for MTU of 1492)";
    $return{"found"} = $output_html;
    $return{"found"} =~ s/\n/<br>/g;
    $return{"status"} = "ok"  if ($output =~ /icmp_seq=\d+ ttl=\d+ time=\d+/);

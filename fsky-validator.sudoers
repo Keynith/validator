@@ -1,0 +1,1 @@
+www-data	ALL = (root) NOPASSWD: /bin/ip -6 route flush cache

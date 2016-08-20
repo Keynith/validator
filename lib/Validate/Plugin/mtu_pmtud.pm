@@ -41,7 +41,7 @@ sub run {
    }
    
    my $pinghost = $mtu1280;
-   my $cmd = "ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
+   my $cmd = "sudo ip -6 route flush cache 2>&1 ; ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
    my $output = `$cmd 2>&1`;
    
    my $output_html = escapeHTML($output);
@@ -66,7 +66,7 @@ For more information, please see
 https://github.com/falling-sky/source/wiki/InstallPMTUD
 EOF
    
-   $return{"expect"} = "ping -M dont -c 3 -s 1452 $pinghost fails with 'Packet too big'<br>(testing for emulated MTU of 1280)";
+   $return{"expect"} = "ping6 -M dont -c 3 -s 1452 $pinghost fails with 'Packet too big'<br>(testing for emulated MTU of 1280)";
    $return{"found"} = $output_html;
    if ($output =~ /mtu=1280/) {
      $return{"status"}="ok";
