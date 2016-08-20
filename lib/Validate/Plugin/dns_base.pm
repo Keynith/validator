@@ -21,7 +21,7 @@ sub run {
    my $domain = $config{"load"}{"domain"};
    
    my $dns =  Validate::Plugin::DNS->new($validate);
-   my %return = $dns->check("$site","66.220.4.227","A");
+   my %return = $dns->check("$site","2001:470:1:18:1000::46","A");
    unless ($return{"status"} eq "ok") {
      if ($return{"found"} =~ /AAAA/) {
        $return{"brief"}="$site should be single stack IPv4";

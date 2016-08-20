@@ -23,7 +23,7 @@ sub run {
     my $dns = Validate::Plugin::DNS->new($validate);
     my $check = "ds.v6ns.$domain";
 
-    my %return = $dns->check( "$check", "66.220.4.226","A","AAAA");
+    my %return = $dns->check( "$check", "2001:470:1:18:1000::4","A","AAAA");
     
     $return{"expect"} = <<EOF;
  $check A SERVFAIL

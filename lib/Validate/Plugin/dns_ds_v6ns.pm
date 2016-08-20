@@ -23,7 +23,7 @@ sub run {
     my $dns = Validate::Plugin::DNS->new($validate);
     my $check = "ds.v6ns.$domain";
 
-    my %return = $dns->check( "$check", "66.220.4.227", "A", "AAAA" );
+    my %return = $dns->check( "$check", "2001:470:1:18:1000::46", "A", "AAAA" );
     return \%return;
 } ## end sub run
 

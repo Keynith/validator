@@ -21,7 +21,7 @@ sub run {
    my $domain = $config{"load"}{"domain"};
    
    my $dns =  Validate::Plugin::DNS->new($validate);
-   my %return = $dns->check("ds.$domain","66.220.4.227","A","AAAA");
+   my %return = $dns->check("ds.$domain","2001:470:1:18:1000::46","A","AAAA");
    
    return \%return;
 }
