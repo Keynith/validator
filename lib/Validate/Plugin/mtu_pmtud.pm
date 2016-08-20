@@ -66,7 +66,7 @@ For more information, please see
 https://github.com/falling-sky/source/wiki/InstallPMTUD
 EOF
    
-   $return{"expect"} = "ping6 -M dont -c 3 -s 1452 $pinghost fails with 'Packet too big'<br>(testing for emulated MTU of 1280)";
+   $return{"expect"} = "ping6 -M dont -c 3 -s 1452 $pinghost generates at least one 'Packet too big' response<br>(testing for emulated MTU of 1280)";
    $return{"found"} = $output_html;
    if ($output =~ /mtu=1280/) {
      $return{"status"}="ok";

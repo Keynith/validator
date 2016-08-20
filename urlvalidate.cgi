@@ -6,14 +6,12 @@ use LWP::UserAgent;
 use URI;
 use Socket;
 use Socket6;
-use FindBin qw($Bin);
-use lib "$Bin/lib";
 use strict;
 
 my $q      = new CGI;
 my $method = $q->request_method;
 
-#die "Use POST instead of $method" unless ($method eq "POST");
+die "Use POST instead of $method" unless ($method eq "POST");
 
 my $timeout = $q->param("timeout");
 my $url     = $q->param("url");
@@ -47,8 +45,11 @@ sub checkUrl {
     my $ua = LWP::UserAgent->new();
     $ua->timeout($timeout);
     my $response = $ua->get($url);
-    print "Status: " . $response->status_line;
-    print "\n\n";
-    print "Status: " . $response->status_line;
+    print "Status: " . $response->status_line . "\n";
+    foreach my $label (qw( Content-Type )) {
+      my $val = $response->header($label);
+      print "$label: $val\n" if ($val);
+    }
+    print "Content-length: 0\n\n";
     exit;
 }

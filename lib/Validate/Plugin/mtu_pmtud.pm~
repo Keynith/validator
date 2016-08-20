@@ -41,7 +41,7 @@ sub run {
    }
    
    my $pinghost = $mtu1280;
-   my $cmd = "sudo ip -6 route flush cache ; ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
+   my $cmd = "sudo ip -6 route flush cache 2>&1 ; ping6 -M dont -c 3 -s 1452 " . "\Q$pinghost";
    my $output = `$cmd 2>&1`;
    
    my $output_html = escapeHTML($output);
